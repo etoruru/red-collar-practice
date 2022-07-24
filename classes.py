@@ -88,7 +88,7 @@ class Wizard(Base):
         if self.has_stamina() and self.fp >= 15:
             self.stamina -= 20
             self.fp -= 15
-            return f"Magic attack: -{self.damage}"
+            return f"Magic attack: -{damage}"
         else:
             return "Need a relax!"
 
