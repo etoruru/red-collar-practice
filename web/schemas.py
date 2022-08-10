@@ -1,40 +1,49 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
+from enum import Enum
 
 
-class UnitBase(BaseModel):
-    id: int
-    unit: str
+class Unit(Enum):
+    g = 'г'
+    kg = 'кг'
+    l = 'л'
+    lspoon = 'ст.л'
+    smspoon = 'ч.л'
+    cup = 'стакан'
+    pcs = 'шт'
 
-    class Config:
-        orm_mode = True
 
-
-class RecipeTypeBase(BaseModel):
-    id: int
-    type: str
-
-    class Config:
-        orm_mode = True
+class RecipeType(Enum):
+    soup = 'суп'
+    main_dish = 'основное'
+    dessert = 'десерт'
+    salad = 'салат'
+    drink = 'напиток'
+    snacks = 'закуска'
+    pizza = 'пицца'
+    sauce = 'соус'
 
 
 class RecipeBase(BaseModel):
-    id: int = Field(alias='recipe_id')
-    recipe_name: str = Field(alias='recipe_name')
-    process: str
-    temp: float
+    # recipe_id: int
+    recipe_name: str
+    manual: str
+    temp: Optional[float]
     time: int
-    type_id: int
+    type: RecipeType
+
 
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
 
 
+
 class IngredientsBase(BaseModel):
-    id: int = Field(alias='ingredient_id')
-    ing_name: str = Field(alias='ing_name')
-    unit_id: int
+    # ingredient_id: int
+    ing_name: str
+    unit: Unit
+    quantity: Optional[float]
 
     class Config:
         orm_mode = True
@@ -46,4 +55,18 @@ class RecipeSchema(RecipeBase):
 
 
 class IngredientsSchema(IngredientsBase):
-    recipes: List[RecipeBase]
+    recipe: List[RecipeBase]
+
+
+# class IngredientCreate(BaseModel):
+#     ing_name: str
+#     unit: Unit
+#
+#
+# class RecipeCreate(BaseModel):
+#     ingredients: List[IngredientCreate]
+#     quantity: float
+#
+
+
+

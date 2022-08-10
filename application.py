@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker, Session
-from database.models import metadata
+from database.models import Base
 
 from web.router import api_router
 
@@ -10,7 +10,7 @@ def startup(app: FastAPI):
 
     def _startup():
         engine = create_engine('postgresql:///recipes')
-        metadata.create_all(engine)
+        Base.metadata.create_all(engine)
         session_factory = scoped_session(
             sessionmaker(
                 engine,
