@@ -1,39 +1,35 @@
 from fastapi import Depends, HTTPException
 from fastapi.routing import APIRouter
-
 from sqlalchemy.orm import Session
 from typing import List
 
 from web.dependencies import get_recipes_repo, get_db, get_ingredients_repo
-from web.schemas import RecipeSchema
+from web.schemas import RecipeSchema, RecipeOut
 from database.recipe import RecipesRepo
 from database.ingredients import IngredientsRepo
-
 from database.models import RecipeIngredients
 
 
 router = APIRouter()
 
 
-@router.get('/', response_model=List[RecipeSchema])
+@router.get('/menu')
 def get_menu(
+        recipe_repo: RecipesRepo = Depends(get_recipes_repo),
+        session: Session = Depends(get_db)):
+    with session.begin():
+        return recipe_repo.get_menu()
+
+
+@router.get('/', response_model=List[RecipeOut])
+def get_all(
         recipe_repo: RecipesRepo = Depends(get_recipes_repo),
         session: Session = Depends(get_db)):
     with session.begin():
         return recipe_repo.all()
 
 
-@router.get('/{recipe_id}')
-def get_recipe(
-        recipe_id: int,
-        recipe_repo: RecipesRepo = Depends(get_recipes_repo),
-        session: Session = Depends(get_db)
-):
-    with session.begin():
-        return recipe_repo.get(recipe_id)
-
-
-@router.get('/search/{recipe_name}')
+@router.get('/search/{recipe_name}', response_model=RecipeOut)
 def get_recipe_by_name(
         recipe_name,
         recipe_repo: RecipesRepo = Depends(get_recipes_repo),
@@ -41,6 +37,16 @@ def get_recipe_by_name(
 ):
     with session.begin():
         return recipe_repo.get_recipe_by_name(recipe_name)
+
+
+@router.get('/{recipe_id}', response_model=RecipeOut)
+def get_recipe(
+        recipe_id: int,
+        recipe_repo: RecipesRepo = Depends(get_recipes_repo),
+        session: Session = Depends(get_db)
+):
+    with session.begin():
+        return recipe_repo.get(recipe_id)
 
 
 def create_ingredients(
@@ -70,7 +76,7 @@ def create_recipe(
         new_recipe: RecipeSchema,
         recipe_repo: RecipesRepo = Depends(get_recipes_repo),
         session: Session = Depends(get_db)):
-    ingredient_repo = IngredientsRepo(session)
+    ingredient_repo = get_ingredients_repo(session)
     with session.begin():
         recipe = recipe_repo.get_recipe_by_name(new_recipe.recipe_name)
         if recipe:
@@ -83,11 +89,18 @@ def create_recipe(
 
 
 @router.put('/{recipe_id}')
-def change_recipe(recipe_id: int, db: Session=Depends(get_recipes_repo)):
-    pass
+def change_recipe_name(
+        recipe_id: int,
+        new_name,
+        recipe_repo: RecipesRepo = Depends(get_recipes_repo),
+        session: Session = Depends(get_db)):
+    with session.begin():
+        recipe = recipe_repo.get(recipe_id)
+        return recipe_repo.update_name(recipe, new_name)
 
 
-@router.delete('{recipe_id')
+
+@router.delete('{recipe_id}')
 def delete_recipe(
         recipe_id: int,
         recipe_repo: RecipesRepo = Depends(get_recipes_repo),

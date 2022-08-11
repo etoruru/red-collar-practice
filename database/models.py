@@ -15,14 +15,12 @@ class RecipeIngredients(Base):
     ingredient_id = sa.Column(sa.ForeignKey("ingredients.ingredient_id", ondelete="CASCADE"), primary_key=True )
     quantity = sa.Column(sa.Float, nullable=False)
     recipe = relationship("RecipeModel", back_populates='ingredients', cascade="all, delete")
-    ingredient = relationship("IngredientsModel", back_populates='recipe',  cascade="all, delete")
+    ingredient = relationship("IngredientsModel", back_populates='recipe')
 
     #proxies
     recipe_name = association_proxy(target_collection='recipe', attr='recipe_name')
     ing_name = association_proxy(target_collection='ingredient', attr='ing_name')
     unit = association_proxy(target_collection='ingredient', attr='unit')
-
-
 
 
 class RecipeModel(Base):
@@ -34,8 +32,8 @@ class RecipeModel(Base):
     temp: float = sa.Column(sa.Integer)
     time: int = sa.Column(sa.Integer)
     type: str = sa.Column(sa.Enum(RecipeType))
-    ingredients = relationship("RecipeIngredients", back_populates='recipe', cascade="all, delete")
-
+    price: float = sa.Column(sa.Float)
+    ingredients = relationship("RecipeIngredients", back_populates='recipe', cascade="all, delete-orphan", single_parent=True)
 
 
 class IngredientsModel(Base):

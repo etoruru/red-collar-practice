@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker, Session
-from database.models import Base
 
+from database.models import Base
 from web.router import api_router
 
 
